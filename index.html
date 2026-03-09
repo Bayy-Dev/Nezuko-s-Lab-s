@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TOOLSBOX | NEZUKO'S LAB'S</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            /* Dark Mode (Default) */
+            --primary: #2b6be2;
+            --bg: #050505;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --text: #ffffff;
+            --text-dim: #a0a0a0;
+            --accent: #ff007f;
+            --border: rgba(255, 255, 255, 0.08);
+            --wa-green: #25D366;
+            --canvas-opacity: 0.6;
+        }
+
+        [data-theme="light"] {
+            --bg: #f0f2f5;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --text: #1a1a1a;
+            --text-dim: #555555;
+            --border: rgba(0, 0, 0, 0.1);
+            --canvas-opacity: 0.3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        ::-webkit-scrollbar { display: none; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* --- BACKGROUND PARTICLES --- */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: var(--canvas-opacity);
+            background: radial-gradient(circle at 10% 20%, rgba(138, 43, 226, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(255, 0, 127, 0.1) 0%, transparent 40%);
+        }
+
+        .container {
+            padding: 40px 24px;
+            max-width: 100%;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- THEME TOGGLE --- */
+        .theme-switch {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            color: var(--text);
+            font-size: 1.2rem;
+        }
+
+        /* --- ANIMATION --- */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        .logo span {
+            color: var(--primary);
+            text-shadow: 0 0 15px var(--primary);
+            margin-left: 4px;
+        }
+
+        /* --- HEADER --- */
+        header {
+            margin-bottom: 40px;
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -2px;
+            margin-bottom: 15px;
+        }
+
+        header h1 span {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-dim);
+            font-size: 1rem;
+            max-width: 90%;
+            font-weight: 500;
+        }
+
+        /* --- GRID & CARDS --- */
+        .grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 24px;
+            border-radius: 28px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(12px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(255, 0, 127, 0.1));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 18px;
+            border: 1px solid var(--border);
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            font-size: 0.6rem;
+            padding: 4px 10px;
+            background: var(--accent);
+            color: white;
+            border-radius: 20px;
+        }
+
+        /* --- FLOATING CS --- */
+        .float-cs {
+            position: fixed;
+            bottom: 30px;
+            right: 25px;
+            background-color: var(--wa-green);
+            color: white;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4); 
+            z-index: 100;
+            text-decoration: none;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (min-width: 768px) {
+            .container { padding: 60px 10%; }
+            .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (min-width: 1100px) {
+            .container { padding: 60px 15%; }
+            .grid { grid-template-columns: repeat(3, 1fr); }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div id="particles-js"></div>
+
+    <div class="container">
+        <nav>
+            <div class="logo">Nezuko's <span>Lab's</span></div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div class="theme-switch" id="theme-toggle">
+                    <i class="fas fa-moon"></i>
+                </div>
+            </div>
+        </nav>
+
+        <header>
+            <h1>All Feature <br><span>Nezuko's OS</span></h1>
+            <p>BERIKUT ADALAH LIST FEATURE YG TERSEDIA —͟͟͞͞★</p>
+        </header>
+
+        <main class="grid">
+            <a href="chat.html" class="card">
+                <div class="card-icon">⚛</div>
+                <h3>Nezuko Ai</h3>
+                <p>Asisten cerdas berbasis Llama 3.3. Cepat, responsif, dan punya kepribadian unik.</p>
+            </a>
+            <a href="iqc.html" class="card">
+                <div class="card-icon">💬</div>
+                <h3>IQC Generator <span class="badge">Hot</span></h3>
+                <p>Generator chat WhatsApp iPhone dengan menu context blur yang sangat realistik.</p>
+    
+            <a href="femboy.html" class="card">
+                <div class="card-icon">💕</div>
+                <h3>Cek Femboy</h3>
+                <p>Ukur persentase gaya femboy-mu dengan algoritma random generator kami.</p>
+            </a>
+            
+            <a href="tiktok.html" class="card">
+                <div class="card-icon">📥</div>
+                <h3>Tiktok Downloader</h3>
+                <p>Unduh video kualitas HD tanpa watermark dan konversi ke MP3 secara instan.</p>
+            </a>
+            
+            <a href="bg.html" class="card">
+                <div class="card-icon">🖼️</div>
+                <h3>Remove Background</h3>
+                <p>Hapus background foto secara instan.</p>
+            </a>
+          
+            <a href="tourl.html" class="card">
+                <div class="card-icon">📎</div>
+                <h3>Images To URL</h3>
+                <p>Ubah foto menjadi url secara instan.</p>
+            </a>
+          
+            <div class="card" style="opacity: 0.6; border-style: dashed;">
+                <div class="card-icon" style="filter: grayscale(1);">🌑</div>
+                <h3>Upcoming Tool</h3>
+                <p>Punya ide? Hubungi admin via WhatsApp untuk request fitur baru!</p>
+            </div>
+        </main>
+
+        <footer style="margin-top: 80px; text-align: center; color: var(--text-dim); font-size: 0.7rem; letter-spacing: 2px; padding-bottom: 20px;">
+            &mdash; Created by Chiyoo Senpaii &bull; 2026 &mdash;
+        </footer>
+    </div>
+
+    <a href="https://wa.me/6283894641570" class="float-cs" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        // Particles Config
+        particlesJS('particles-js', {
+            "particles": {
+                "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": "#2b6be2" },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.5, "random": true },
+                "size": { "value": 3, "random": true },
+                "line_linked": { "enable": true, "distance": 150, "color": "#2b6be2", "opacity": 0.2, "width": 1 },
+                "move": { "enable": true, "speed": 2, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": true, "mode": "push" } }
+            },
+            "retina_detect": true
+        });
+
+        // Theme Switch Logic
+        const toggleBtn = document.getElementById('theme-toggle');
+        const body = document.body;
+        const icon = toggleBtn.querySelector('i');
+
+        // Check Saved Theme
+        if(localStorage.getItem('theme') === 'light') {
+            body.setAttribute('data-theme', 'light');
+            icon.classList.replace('fa-moon', 'fa-sun');
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            if(body.getAttribute('data-theme') === 'dark') {
+                body.setAttribute('data-theme', 'light');
+                icon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ImgBB Host | Nezuko Tools</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --bg: #050507;
+            --card-bg: rgba(22, 22, 30, 0.98);
+            --accent: #00f2ff;
+            --pink: #ff007f;
+            --dark-btn: #1a1a24;
+        }
+
+        body {
+            background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0; width: 100vw; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden; position: relative;
+        }
+
+        #particle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+        .main-card {
+            width: 92%; max-width: 450px;
+            background: var(--card-bg); backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px; padding: 30px;
+            box-shadow: 0 0 50px rgba(0, 242, 255, 0.2);
+            z-index: 10; display: flex; flex-direction: column; align-items: center;
+        }
+
+        .header-section { text-align: center; margin-bottom: 25px; width: 100%; }
+        .header-section h1 { color: var(--accent); font-size: 1.5rem; font-weight: 800; margin: 0; text-shadow: 0 0 10px var(--accent); letter-spacing: 2px; }
+
+        .upload-zone {
+            width: 100%; border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: 40px; background: rgba(0,0,0,0.5);
+            cursor: pointer; transition: 0.3s; margin-bottom: 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px;
+            box-sizing: border-box; position: relative;
+        }
+        .upload-zone:hover { border-color: var(--accent); background: rgba(0, 242, 255, 0.05); }
+
+        #previewImg {
+            max-width: 100%; max-height: 180px; border-radius: 12px;
+            display: none; border: 2px solid var(--accent);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); margin-top: 5px;
+        }
+
+        .btn-main {
+            width: 100%; padding: 18px; border: none; border-radius: 18px;
+            background: linear-gradient(90deg, var(--accent), #00a2ff);
+            color: #fff; font-weight: 800; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            margin-bottom: 12px; transition: 0.3s;
+        }
+        .btn-main:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
+
+        .btn-secondary {
+            width: 100%; padding: 16px; border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px; background: var(--dark-btn); color: #fff;
+            font-weight: 700; text-transform: uppercase; font-size: 0.75rem;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            text-decoration: none; transition: 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+
+<div class="main-card">
+    <div class="header-section">
+        <h1>IMGBB HOST</h1>
+        <p style="font-size: 0.6rem; color: #666; margin-top: 5px; letter-spacing: 1px;">PREMIUM CLOUD STORAGE</p>
+    </div>
+
+    <div class="upload-zone" onclick="document.getElementById('fileIn').click()">
+        <div id="uploadIcon" style="text-align: center;">
+            <i class="fas fa-images" style="font-size: 3.5rem; color: var(--accent); margin-bottom: 15px; text-shadow: 0 0 15px var(--accent);"></i>
+            <p style="margin:0; font-weight:800; font-size: 0.9rem; color: #aaa;">SELECT IMAGE</p>
+        </div>
+        <img id="previewImg">
+        <input type="file" id="fileIn" hidden accept="image/*" onchange="previewFile()">
+    </div>
+
+    <button class="btn-main" id="processBtn" disabled onclick="uploadToImgBB()">
+        <i class="fas fa-cloud-upload-alt"></i> GENERATE URL
+    </button>
+
+    <a href="index.html" class="btn-secondary">
+        <i class="fas fa-arrow-left"></i> KEMBALI KE DASHBOARD
+    </a>
+</div>
+
+<script>
+    // 1. Particle Background
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let p = [];
+    function init() {
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        p = [];
+        for(let i=0; i<60; i++) p.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2, vx: Math.random()*0.4-0.2, vy: Math.random()*0.4-0.2, c: Math.random() > 0.5 ? '#00f2ff' : '#ff007f' });
+    }
+    function draw() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        p.forEach(i => {
+            i.x+=i.vx; i.y+=i.vy;
+            if(i.x<0||i.x>canvas.width) i.vx*=-1;
+            if(i.y<0||i.y>canvas.height) i.vy*=-1;
+            ctx.beginPath(); ctx.arc(i.x, i.y, i.s, 0, Math.PI*2); ctx.fillStyle = i.c; ctx.fill();
+        });
+        requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize', init); init(); draw();
+
+    // 2. Preview Logic
+    function previewFile() {
+        const fileInput = document.getElementById('fileIn');
+        const preview = document.getElementById('previewImg');
+        const icon = document.getElementById('uploadIcon');
+        const btn = document.getElementById('processBtn');
+        
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                icon.style.display = 'none';
+                btn.disabled = false;
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // 3. Official ImgBB Upload Logic
+    async function uploadToImgBB() {
+        const fileInput = document.getElementById('fileIn');
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        Swal.fire({
+            title: 'Uploading...',
+            text: 'Processing to ImgBB Cloud...',
+            allowOutsideClick: false,
+            background: '#16161e',
+            color: '#fff',
+            didOpen: () => Swal.showLoading()
+        });
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        // API KEY LO DI SINI MAD
+        const apiKey = '07a4c4d2776360bf7874dd8e678e39af';
+
+        try {
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                const finalUrl = result.data.url;
+                Swal.close();
+
+                Swal.fire({
+                    title: 'IMAGE UPLOADED!',
+                    html: `
+                        <p style="font-size:0.75rem; color:#aaa; margin-bottom:15px;">Link direct kamu sudah siap:</p>
+                        <input id="resultLink" value="${finalUrl}" readonly 
+                        style="width:100%; padding:12px; background:#000; color:#00f2ff; border:1px solid #00f2ff; border-radius:15px; text-align:center; font-family:monospace; font-size:0.85rem;">
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fas fa-copy"></i> Copy Link',
+                    cancelButtonText: 'Tutup',
+                    background: '#16161e',
+                    color: '#fff',
+                    confirmButtonColor: '#00f2ff'
+                }).then((res) => {
+                    if (res.isConfirmed) {
+                        const copyText = document.getElementById("resultLink");
+                        copyText.select();
+                        document.execCommand("copy");
+                        Swal.fire({ title: 'Copied!', icon: 'success', timer: 1000, showConfirmButton: false });
+                    }
+                });
+            } else {
+                throw new Error('Upload gagal');
+            }
+        } catch (error) {
+            Swal.fire('Error!', 'Gagal upload ke ImgBB. Cek API Key lo Mad.', 'error');
+        }
+    }
+</script>
+</body>
+</html>
