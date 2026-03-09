@@ -258,7 +258,7 @@
         </div>
     </div>
     <div class="header-right">
-        <button class="history-btn" id="historyBtn"><i class="fas fa-ellipsis-v"></i></button>
+        <button class="history-btn" id="historyBtn"><i class="fas fa-history"></i></button>
     </div>
 </header>
 
@@ -514,12 +514,18 @@ async function sendMessage() {
         historyList.innerHTML = '';
         chats.slice().reverse().forEach(chat => {
             const item = document.createElement('div');
-            item.className = 'history-item' + (chat.id === currentChatId ? ' active' : '');
+            
+            // class active berdasarkan currentChatId yang sedang aktif
+            item.className = 'history-item' + (String(chat.id) === String(currentChatId) ? ' active' : '');
+            
             item.textContent = chat.title;
+            
             item.onclick = () => {
                 loadChat(chat.id);
+                updateHistoryList();           // <-- BARIS INI DITAMBAHKAN (penting!)
                 historyDropdown.classList.remove('show');
             };
+            
             historyList.appendChild(item);
         });
     }
@@ -677,7 +683,17 @@ clearAllChatsBtn.addEventListener('click', () => {
         currentMode = 'formal';
         menuBtn.style.display = 'none';
         applyTheme('formal');
-        createNewChat(); 
+
+        // Cek apakah ada chat yang tersimpan
+        if (chats.length > 0) {
+            // Load chat TERAKHIR (paling baru) supaya user balik lagi langsung lanjut
+            const lastChatId = chats[chats.length - 1].id;
+            loadChat(lastChatId);
+        } else {
+            // Baru kalau benar-benar kosong, buat yang baru
+            createNewChat();
+        }
+
         updateHistoryList();
     };
 </script>
