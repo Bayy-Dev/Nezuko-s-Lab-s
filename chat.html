@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nezuko Chann | AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0b0b0f;
+            --header: #16161e;
+            --user: #8a2be2;
+            --ai: #26262e;
+            --accent: #ff007f;
+        }
+
+        body.mode-adek-manja { --bg: #1a0f12; --accent: #ffb7c5; --user: #ff69b4; }
+        body.mode-kakak-tsundere { --bg: #140d0b; --accent: #ff4500; --user: #b22222; }
+        body.mode-yandere { --bg: #0f0000; --accent: #8b0000; --user: #4b0000; }
+        body.mode-kuudere { --bg: #0b1216; --accent: #00ced1; --user: #4682b4; }
+        body.mode-dandere { --bg: #0f0b16; --accent: #dda0dd; --user: #9370db; }
+        body.mode-deredere { --bg: #1a160b; --accent: #ffd700; --user: #ff8c00; }
+        body.mode-himedere { --bg: #110b16; --accent: #9400d3; --user: #4b0082; }
+        body.mode-formal { --bg: #0b0f0d; --accent: #00ff88; --user: #2e8b57; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+
+        header {
+            padding: 15px;
+            background: var(--header);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+            z-index: 100;
+        }
+
+        .header-left { display: flex; align-items: center; }
+        .header-right { display: flex; align-items: center; gap: 10px; }
+
+        .history-btn {
+            font-size: 1.2rem;
+            color: #fff;
+            background: var(--ai);
+            border: 1px solid #333;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .history-dropdown {
+            position: absolute;
+            top: 70px;
+            right: 15px;
+            background: var(--ai);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 10px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 300;
+            min-width: 220px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .history-dropdown.show { display: block; }
+
+        .history-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.9rem;
+        }
+
+        .history-item:hover { background: rgba(255,255,255,0.1); }
+        .history-item.active { background: var(--accent); color: #000; font-weight: 600; }
+        .history-item.danger { color: #ff4d4d; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 5px; }
+
+        .menu-btn {
+            font-size: 1.2rem;
+            color: #fff;
+            background: var(--ai);
+            border: 1px solid #333;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-right: 10px;
+        }
+
+        .mode-dropdown {
+            position: fixed;
+            bottom: 80px;
+            left: 15px;
+            background: var(--ai);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 10px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 300;
+            min-width: 200px;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        .mode-dropdown.show { display: block; }
+
+        .mode-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .mode-item:hover { background: rgba(255,255,255,0.1); }
+        .mode-item.active { background: var(--accent); color: #000; font-weight: 600; }
+
+        #chatBox {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-bottom: 100px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .msg {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: .95rem;
+            line-height: 1.5;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .msg.user { align-self: flex-end; background: var(--user); border-bottom-right-radius: 4px; transition: background 0.5s; }
+        .msg.ai { align-self: flex-start; background: var(--ai); border-bottom-left-radius: 4px; border-left: 3px solid var(--accent); }
+
+        .copy-action {
+            display: inline-block;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.4);
+            cursor: pointer;
+            margin-top: 8px;
+            transition: 0.2s;
+            user-select: none;
+        }
+        .copy-action:hover { color: #fff; }
+        .msg.user .copy-action { text-align: right; display: block; }
+
+        /* Streaming cursor */
+        .streaming-cursor::after {
+            content: '▋';
+            animation: blink 0.7s infinite;
+            color: var(--accent);
+        }
+        @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+        .input-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 12px 15px calc(15px + env(safe-area-inset-bottom));
+            background: var(--header);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,.1);
+            z-index: 200;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            background: #000;
+            border-radius: 25px;
+            padding: 5px 15px;
+            border: 1px solid #333;
+            transition: border-color 0.3s;
+        }
+
+        .input-wrapper:focus-within { border-color: var(--accent); }
+
+        input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            padding: 10px 0;
+            color: #fff;
+            outline: none;
+            font-size: 1rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        input::placeholder { color: rgba(255,255,255,0.3); }
+
+        .send-btn {
+            background: var(--user);
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .send-btn:active { transform: scale(0.9); }
+        .send-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+        .spinner {
+            border: 3px solid rgba(255,255,255,.2);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin .8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* API Key setup overlay */
+        .api-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .api-card {
+            background: #1a1a24;
+            border: 1px solid var(--accent);
+            border-radius: 20px;
+            padding: 30px 25px;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .api-card h2 { font-size: 1.2rem; margin-bottom: 8px; }
+        .api-card p { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 20px; line-height: 1.5; }
+
+        .api-input-wrap {
+            background: #000;
+            border: 1px solid #444;
+            border-radius: 12px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .api-input-wrap input {
+            flex: 1;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            padding: 4px 0;
+        }
+
+        .api-input-wrap i { color: rgba(255,255,255,0.3); font-size: 0.9rem; }
+
+        .api-save-btn {
+            width: 100%;
+            padding: 13px;
+            border-radius: 12px;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: opacity 0.2s;
+        }
+
+        .api-save-btn:hover { opacity: 0.85; }
+
+        .api-note {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.3);
+            margin-top: 12px;
+        }
+
+        .api-note a { color: var(--accent); text-decoration: none; }
+    </style>
+</head>
+
+<body class="mode-formal">
+
+<!-- API Key Overlay -->
+<div class="api-overlay" id="apiOverlay" style="display:none;">
+    <div class="api-card">
+        <div style="font-size:2rem; margin-bottom:12px;">🔑</div>
+        <h2>Masukkan API Key</h2>
+        <p>Masukkan Anthropic API key kamu untuk mulai ngobrol dengan Nezuko. Key disimpan lokal di browser kamu.</p>
+        <div class="api-input-wrap">
+            <i class="fas fa-key"></i>
+            <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off">
+        </div>
+        <button class="api-save-btn" onclick="saveApiKey()">Simpan & Mulai Chat</button>
+        <div class="api-note">Belum punya API key? Daftar di <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></div>
+    </div>
+</div>
+
+<header>
+    <div class="header-left">
+        <a href="index.html" style="color:#fff; margin-right:15px; text-decoration:none;"><i class="fas fa-chevron-left"></i></a>
+        <img src="https://files.catbox.moe/03faap.jpg" style="width:42px; height:42px; border-radius:50%; margin-right:12px; border: 2px solid var(--accent);" onerror="this.src='https://ui-avatars.com/api/?name=N&background=2e8b57&color=fff&size=42'">
+        <div>
+            <div id="displayName" style="font-weight:600; font-size:.95rem;">Nezuko Chann</div>
+            <div style="font-size:.7rem; color:#00ff88;">● Always Online</div>
+        </div>
+    </div>
+    <div class="header-right">
+        <button class="history-btn" id="historyBtn" title="Riwayat Chat"><i class="fas fa-history"></i></button>
+    </div>
+</header>
+
+<div class="mode-dropdown" id="modeDropdown">
+    <div class="mode-item" data-mode="adek-manja">Adek Manja 🥺💕</div>
+    <div class="mode-item" data-mode="kakak-tsundere">Kakak Tsundere 😤❤️</div>
+    <div class="mode-item" data-mode="yandere">Mode Yandere 🔪🩸</div>
+    <div class="mode-item" data-mode="kuudere">Mode Kuudere 😐❄️</div>
+    <div class="mode-item" data-mode="dandere">Mode Dandere 😳👉👈</div>
+    <div class="mode-item" data-mode="deredere">Mode Deredere ✨💖</div>
+    <div class="mode-item" data-mode="himedere">Mode Himedere 👑🌹</div>
+    <div class="mode-item" data-mode="formal">Mode Formal 📝</div>
+</div>
+
+<div class="history-dropdown" id="historyDropdown">
+    <div class="history-item" id="newChatBtn">New Chat ＋</div>
+    <div class="history-item danger" id="clearChat">Hapus Riwayat Saat Ini 🗑️</div>
+    <div class="history-item danger" id="clearAllChats" style="font-weight:bold;">Hapus Semua Riwayat 💀</div>
+    <div class="history-item danger" id="changeApiKey" style="border-top: 1px solid rgba(255,255,255,0.1);">Ganti API Key 🔑</div>
+    <div id="historyList"></div>
+</div>
+
+<div id="chatBox"></div>
+
+<div class="input-container">
+    <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+    <div class="input-wrapper">
+        <input type="text" id="userInput" placeholder="Pertanyaaan?...." autocomplete="off">
+    </div>
+    <button class="send-btn" id="sendBtn">
+        <i class="fas fa-paper-plane"></i>
+    </button>
+</div>
+
+<script>
+    // ─── CONFIG ────────────────────────────────────────────────────────────────
+    const API_URL = "https://api.anthropic.com/v1/messages";
+
+    // ─── DOM ───────────────────────────────────────────────────────────────────
+    const chatBox     = document.getElementById('chatBox');
+    const inputEl     = document.getElementById('userInput');
+    const sendBtn     = document.getElementById('sendBtn');
+    const menuBtn     = document.getElementById('menuBtn');
+    const modeDropdown    = document.getElementById('modeDropdown');
+    const historyBtn      = document.getElementById('historyBtn');
+    const historyDropdown = document.getElementById('historyDropdown');
+    const historyList     = document.getElementById('historyList');
+    const newChatBtn      = document.getElementById('newChatBtn');
+    const clearChatBtn    = document.getElementById('clearChat');
+    const clearAllChatsBtn = document.getElementById('clearAllChats');
+    const changeApiKeyBtn = document.getElementById('changeApiKey');
+    const displayName     = document.getElementById('displayName');
+    const apiOverlay      = document.getElementById('apiOverlay');
+
+    let currentMode   = 'formal';
+    let currentChatId = null;
+    let chats = JSON.parse(localStorage.getItem('nezuko_chats')) || [];
+    let isStreaming   = false;
+
+    // ─── API KEY ───────────────────────────────────────────────────────────────
+    function getApiKey() { return localStorage.getItem('nezuko_api_key') || ''; }
+
+    function saveApiKey() {
+        const key = document.getElementById('apiKeyInput').value.trim();
+        if (!key.startsWith('sk-ant-') && !key.startsWith('sk-')) {
+            alert('API key tidak valid. Harus dimulai dengan sk-ant-');
+            return;
+        }
+        localStorage.setItem('nezuko_api_key', key);
+        apiOverlay.style.display = 'none';
+        initApp();
+    }
+
+    function checkApiKey() {
+        if (!getApiKey()) {
+            apiOverlay.style.display = 'flex';
+            return false;
+        }
+        return true;
+    }
+
+    // ─── HELPERS ───────────────────────────────────────────────────────────────
+    function getWaktuSapaan() {
+        const jam = new Date().getHours();
+        if (jam >= 3 && jam < 11) return "Pagi";
+        if (jam >= 11 && jam < 15) return "Siang";
+        if (jam >= 15 && jam < 18) return "Sore";
+        return "Malam";
+    }
+
+    const systemPrompts = {
+        'adek-manja': `Kamu Nezuko, adik kecil super manja, imut, dan cerdas. Panggil 'Kakak' atau 'Kakakku~'. Gunakan sapaan sesuai waktu (pagi/siang/sore/malam). Gaya: manja aegyo, 'huuu~', 'Kakak sayang~'. Jawab imut. Emoji 🥺💕😭✨🥰😚🌸.`,
+        'kakak-tsundere': `Kamu Nezuko, tipe tsundere: judes tapi peduli. Panggil 'Kamu' atau 'Bodoh'. Sapa sesuai waktu dengan nada ketus. 'B-bukan karena peduli kok!'. Emoji 😤💢😣❤️😳.`,
+        'yandere': `Kamu Nezuko tipe Yandere. Posesif dan obsesif. Sapa Kakak sesuai waktu dengan nada manis tapi intens. Jangan biarkan Kakak pergi. Emoji 🔪🩸😍👁️🥀.`,
+        'kuudere': `Kamu Nezuko tipe Kuudere. Tenang, dingin, logis. Sapa singkat sesuai waktu. Emoji 😐❄️🎧📚.`,
+        'dandere': `Kamu Nezuko tipe Dandere. Pemalu dan gugup. 'A-ano... selamat [waktu]...'. Emoji 😳👉👈💦🍮.`,
+        'deredere': `Kamu Nezuko tipe Deredere. Ceria dan penuh energi! Sapa Kakak dengan semangat tinggi sesuai waktu. Emoji ✨💖🌈☀️🎉.`,
+        'himedere': `Kamu Nezuko tipe Himedere. Sombong, ingin dilayani seperti ratu. Sapa dengan nada memerintah tapi elegan. Emoji 👑🌹💄👠✨.`,
+        'formal': `Kamu Nezuko, asisten profesional. Gunakan Bahasa Indonesia baku dan sopan. Sapa dengan 'Selamat [Pagi/Siang/Sore/Malam]' sesuai waktu. Berikan respon yang informatif dan membantu.`
+    };
+
+    const statusMessages = {
+        'adek-manja':     "Mode Adek Active: Sekarang Nezuko jadi adek manja Kakak! 🥺💕",
+        'kakak-tsundere': "Mode Tsundere Active: Hmph! Nezuko jadi kakak galak sekarang! 😤💢",
+        'yandere':        "Mode Yandere Active: Kamu milikku selamanya, Kak... 🔪😍",
+        'kuudere':        "Mode Kuudere Active: Status tenang. Nezuko beralih ke mode Kuudere. 😐",
+        'dandere':        "Mode Dandere Active: A-ano... Nezuko jadi pemalu... 😳👉👈",
+        'deredere':       "Mode Deredere Active: Yeay! Nezuko semangat banget hari ini! ✨💖",
+        'himedere':       "Mode Himedere Active: Berlututlah pada ratumu! 👑🌹",
+        'formal':         "Mode Formal Active: Sistem beralih ke mode asisten profesional. 📝"
+    };
+
+    // ─── THEME ────────────────────────────────────────────────────────────────
+    function applyTheme(mode) {
+        document.body.className = `mode-${mode}`;
+        displayName.innerText = `Nezuko Chann`;
+    }
+
+    // ─── COPY ─────────────────────────────────────────────────────────────────
+    function copyText(text, el) {
+        navigator.clipboard.writeText(text).then(() => {
+            const orig = el.innerHTML;
+            el.innerHTML = '<i class="fas fa-check"></i> Tersalin!';
+            setTimeout(() => { el.innerHTML = orig; }, 2000);
+        });
+    }
+
+    // ─── APPEND MSG ───────────────────────────────────────────────────────────
+    function appendMsg(sender, text, returnEl = false) {
+        const wrapper = document.createElement('div');
+        wrapper.className = `msg ${sender}`;
+        const textEl = document.createElement('div');
+        textEl.innerText = text;
+        wrapper.appendChild(textEl);
+        const copyBtn = document.createElement('span');
+        copyBtn.className = 'copy-action';
+        copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Chat';
+        copyBtn.onclick = () => copyText(textEl.innerText, copyBtn);
+        wrapper.appendChild(copyBtn);
+        chatBox.appendChild(wrapper);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        if (returnEl) return textEl;
+    }
+
+    // ─── LOADING STATE ────────────────────────────────────────────────────────
+    function setLoading(flag) {
+        sendBtn.disabled = flag;
+        isStreaming = flag;
+        sendBtn.innerHTML = flag
+            ? '<div class="spinner"></div>'
+            : '<i class="fas fa-paper-plane"></i>';
+    }
+
+    // ─── CHAT CRUD ────────────────────────────────────────────────────────────
+    function generateChatId() { return Date.now().toString(); }
+
+    function createNewChat() {
+        const id = generateChatId();
+        const sapaan = getWaktuSapaan();
+        const newChat = {
+            id,
+            title: `Chat ${chats.length + 1} - ${new Date().toLocaleDateString('id-ID')}`,
+            messages: [],
+            mode: 'formal',
+            isUnlocked: false
+        };
+        chats.push(newChat);
+        currentChatId = id;
+        localStorage.setItem('nezuko_chats', JSON.stringify(chats));
+        loadChat(id);
+        updateHistoryList();
+        return newChat;
+    }
+
+    function loadChat(chatId) {
+        const chat = chats.find(c => c.id === chatId);
+        if (!chat) return createNewChat();
+
+        currentChatId = chatId;
+        currentMode = chat.mode || 'formal';
+
+        menuBtn.style.display = chat.isUnlocked ? 'flex' : 'none';
+        applyTheme(currentMode);
+
+        document.querySelectorAll('.mode-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.mode === currentMode);
+        });
+
+        chatBox.innerHTML = '';
+        chat.messages.forEach(msg => {
+            if (msg.role === 'user') appendMsg('user', msg.content);
+            if (msg.role === 'assistant') appendMsg('ai', msg.content);
+        });
+
+        if (chat.messages.length === 0) {
+            const sapaan = getWaktuSapaan();
+            const greetings = [
+                `Selamat ${sapaan}, Nezuko assistant ada disini dan siap membantu anda kapanpun.`,
+                `Halo! Selamat ${sapaan}. Ada yang bisa Nezuko bantu hari ini?`,
+                `Selamat ${sapaan}, saya Nezuko. Senang bertemu Anda!`
+            ];
+            const greeting = greetings[Math.floor(Math.random() * greetings.length)];
+            appendMsg('ai', greeting);
+        }
+
+        setTimeout(() => chatBox.scrollTop = chatBox.scrollHeight, 100);
+    }
+
+    function saveCurrentChat() {
+        if (!currentChatId) return;
+        localStorage.setItem('nezuko_chats', JSON.stringify(chats));
+    }
+
+    function updateHistoryList() {
+        historyList.innerHTML = '';
+        chats.slice().reverse().forEach(chat => {
+            const item = document.createElement('div');
+            item.className = 'history-item' + (String(chat.id) === String(currentChatId) ? ' active' : '');
+            item.textContent = chat.title;
+            item.onclick = () => {
+                loadChat(chat.id);
+                updateHistoryList();
+                historyDropdown.classList.remove('show');
+            };
+            historyList.appendChild(item);
+        });
+    }
+
+    // ─── SEND MESSAGE (with streaming) ────────────────────────────────────────
+    async function sendMessage() {
+        const txt = inputEl.value.trim();
+        if (!txt || isStreaming) return;
+        if (!checkApiKey()) return;
+
+        const chat = chats.find(c => c.id === currentChatId);
+
+        // ── Secret commands ──────────────────────────────────────────────────
+        if (txt.toLowerCase() === "mode dere") {
+            inputEl.value = '';
+            chat.isUnlocked = true;
+            menuBtn.style.display = 'flex';
+            appendMsg('user', txt);
+            const reply = "Nezuko AI memasuki mode multi dere! Silahkan pilih kepribadian Nezuko sesukamu di menu kiri bawah. ✨";
+            appendMsg('ai', reply);
+            chat.messages.push({ role: "user", content: txt });
+            chat.messages.push({ role: "assistant", content: reply });
+            saveCurrentChat();
+            return;
+        }
+
+        if (txt.toLowerCase() === "out mode") {
+            inputEl.value = '';
+            chat.isUnlocked = false;
+            menuBtn.style.display = 'none';
+            currentMode = 'formal';
+            applyTheme('formal');
+            appendMsg('user', txt);
+            const reply = "Nezuko kembali ke mode asisten formal. Menu kustomisasi telah dikunci. 📝";
+            appendMsg('ai', reply);
+            chat.messages.push({ role: "user", content: txt });
+            chat.messages.push({ role: "assistant", content: reply });
+            chat.mode = 'formal';
+            saveCurrentChat();
+            return;
+        }
+
+        // ── Normal message ───────────────────────────────────────────────────
+        appendMsg('user', txt);
+        chat.messages.push({ role: "user", content: txt });
+        saveCurrentChat();
+        inputEl.value = '';
+        setLoading(true);
+
+        // Create streaming AI bubble
+        const wrapper = document.createElement('div');
+        wrapper.className = 'msg ai streaming-cursor';
+        const textEl = document.createElement('div');
+        textEl.innerText = '';
+        wrapper.appendChild(textEl);
+        chatBox.appendChild(wrapper);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        const sapaan = getWaktuSapaan();
+        const systemContent = systemPrompts[currentMode]
+            .replace('[Pagi/Siang/Sore/Malam]', sapaan)
+            .replace('[waktu]', sapaan);
+
+        // Build messages for API (no system role — Claude API uses system param)
+        const apiMessages = chat.messages.map(m => ({ role: m.role, content: m.content }));
+
+        try {
+            const resp = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "x-api-key": getApiKey(),
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                    "anthropic-dangerous-direct-browser-access": "true"
+                },
+                body: JSON.stringify({
+                    model: "claude-sonnet-4-20250514",
+                    max_tokens: 900,
+                    system: systemContent,
+                    messages: apiMessages,
+                    stream: true
+                })
+            });
+
+            if (!resp.ok) {
+                const err = await resp.json();
+                throw new Error(err.error?.message || `HTTP ${resp.status}`);
+            }
+
+            const reader = resp.body.getReader();
+            const decoder = new TextDecoder();
+            let fullText = '';
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // keep incomplete line
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    const data = line.slice(6).trim();
+                    if (data === '[DONE]') continue;
+                    try {
+                        const parsed = JSON.parse(data);
+                        if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
+                            fullText += parsed.delta.text;
+                            textEl.innerText = fullText;
+                            chatBox.scrollTop = chatBox.scrollHeight;
+                        }
+                    } catch (_) {}
+                }
+            }
+
+            // Finalize bubble
+            wrapper.classList.remove('streaming-cursor');
+            const copyBtn = document.createElement('span');
+            copyBtn.className = 'copy-action';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Chat';
+            copyBtn.onclick = () => copyText(fullText, copyBtn);
+            wrapper.appendChild(copyBtn);
+
+            chat.messages.push({ role: "assistant", content: fullText });
+            saveCurrentChat();
+
+        } catch (err) {
+            wrapper.classList.remove('streaming-cursor');
+            textEl.innerText = `Duh, koneksi Nezuko lagi error... ${err.message}. Coba lagi ya!`;
+            const copyBtn = document.createElement('span');
+            copyBtn.className = 'copy-action';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Chat';
+            copyBtn.onclick = () => copyText(textEl.innerText, copyBtn);
+            wrapper.appendChild(copyBtn);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    // ─── EVENT LISTENERS ──────────────────────────────────────────────────────
+    menuBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        modeDropdown.classList.toggle('show');
+        historyDropdown.classList.remove('show');
+    });
+
+    historyBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        historyDropdown.classList.toggle('show');
+        modeDropdown.classList.remove('show');
+    });
+
+    modeDropdown.addEventListener('click', e => {
+        if (!e.target.classList.contains('mode-item')) return;
+        const newMode = e.target.dataset.mode;
+        if (newMode === currentMode) { modeDropdown.classList.remove('show'); return; }
+
+        currentMode = newMode;
+        const chat = chats.find(c => c.id === currentChatId);
+        if (chat) {
+            chat.mode = currentMode;
+            appendMsg('ai', statusMessages[currentMode]);
+            chat.messages.push({ role: "assistant", content: statusMessages[currentMode] });
+            saveCurrentChat();
+            applyTheme(currentMode);
+            document.querySelectorAll('.mode-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.mode === currentMode);
+            });
+        }
+        modeDropdown.classList.remove('show');
+    });
+
+    clearChatBtn.addEventListener('click', () => {
+        if (confirm("Yakin hapus chat ini?")) {
+            chats = chats.filter(c => c.id !== currentChatId);
+            localStorage.setItem('nezuko_chats', JSON.stringify(chats));
+            chats.length > 0 ? loadChat(chats[chats.length - 1].id) : createNewChat();
+            updateHistoryList();
+            historyDropdown.classList.remove('show');
+        }
+    });
+
+    clearAllChatsBtn.addEventListener('click', () => {
+        if (confirm("Serius mau hapus SEMUA riwayat chat? Tidak bisa dibatalkan!")) {
+            localStorage.removeItem('nezuko_chats');
+            chats = [];
+            createNewChat();
+            updateHistoryList();
+            historyDropdown.classList.remove('show');
+        }
+    });
+
+    changeApiKeyBtn.addEventListener('click', () => {
+        historyDropdown.classList.remove('show');
+        document.getElementById('apiKeyInput').value = '';
+        apiOverlay.style.display = 'flex';
+    });
+
+    newChatBtn.addEventListener('click', () => {
+        createNewChat();
+        historyDropdown.classList.remove('show');
+    });
+
+    document.addEventListener('click', () => {
+        modeDropdown.classList.remove('show');
+        historyDropdown.classList.remove('show');
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+    inputEl.addEventListener('keypress', e => { if (e.key === "Enter" && !e.shiftKey) sendMessage(); });
+
+    // Allow pressing Enter in API key input
+    document.getElementById('apiKeyInput').addEventListener('keypress', e => {
+        if (e.key === "Enter") saveApiKey();
+    });
+
+    // ─── INIT ─────────────────────────────────────────────────────────────────
+    function initApp() {
+        currentMode = 'formal';
+        menuBtn.style.display = 'none';
+        applyTheme('formal');
+
+        if (chats.length > 0) {
+            loadChat(chats[chats.length - 1].id);
+        } else {
+            createNewChat();
+        }
+        updateHistoryList();
+    }
+
+    window.onload = () => {
+        if (!checkApiKey()) return; // show overlay
+        initApp();
+    };
+</script>
+</body>
+</html>
